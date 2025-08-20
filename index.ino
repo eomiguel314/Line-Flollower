@@ -52,6 +52,31 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
+void Gangorra(){
+  if(inc >> necessaria){
+    Motor1.Speed(200)
+    Motor2.Speed(200)
+  } else{
+    Motor1.Speed(200)
+    Motor2.Speed(200)
+  }
+}
+void SeguirLinha(){
+      if (centro && !esquerda && !direita) {
+      Motor1.Forward();
+      Motor2.Forward();
+    } else if (esquerda && !direita) {
+      Motor1.Forward();
+      Motor2.Stop();
+    } else if (!esquerda && direita) {
+      Motor1.Stop();
+      Motor2.Forward();
+    } else {
+      Motor1.Stop();
+      Motor2.Stop();
+    }
+  }
+}
 
 void loop() {a
   for (int i = 0; i < num_sensores; i++) {
@@ -83,22 +108,13 @@ void loop() {a
     delay(500);
     Motor2.Stop();
   } else {
-    if (centro && !esquerda && !direita) {
-      Motor1.Forward();
-      Motor2.Forward();
-    } else if (esquerda && !direita) {
-      Motor1.Forward();
-      Motor2.Stop();
-    } else if (!esquerda && direita) {
-      Motor1.Stop();
-      Motor2.Forward();
-    } else {
-      Motor1.Stop();
-      Motor2.Stop();
-    }
+    SeguirLinha();
   }
 
-  Serial.print("E: "); Serial.print(read[0]);
-  Serial.print(" | C: "); Serial.print(read[1]);
-  Serial.print(" | D: "); Serial.print(read[2]);
-  Serial.print(" | Dist: "); Serial.println(distance);
+//   Serial.print("E: "); Serial.print(read[0]);
+//   Serial.print(" | C: "); Serial.print(read[1]);
+//   Serial.print(" | D: "); Serial.print(read[2]);
+//   Serial.print(" | Dist: "); Serial.println(distance);
+}// obs: isso e´ pro debug, tirar na hora da apresentaçao
+
+
