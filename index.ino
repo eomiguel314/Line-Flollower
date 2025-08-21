@@ -1,12 +1,12 @@
-int limiar = 500;// lucas , ajuste dps com um codigo de leitura caso nao funcione
+const int limiar = 500;  
 const int sensores[] = {A0, A1, A2};
 const int num_sensores = 3;
-int read[num_sensores];
+int leitura[num_sensores];
 
 const int trigPin = 7;
 const int echoPin = 8;
-long time;
-int distance;
+long tempo;
+int distancia;
 
 class DCMotor {
   int spd = 255, pin1, pin2;
@@ -19,8 +19,8 @@ public:
     pinMode(pin2, OUTPUT);
   }
 
-  void Speed(int in1) {
-    spd = in1;
+  void Speed(int vel) {
+    spd = constrain(vel, 0, 255);
   }
 
   void Forward() {
@@ -41,80 +41,79 @@ public:
 
 DCMotor Motor1, Motor2;
 
-void setup() {
-  Serial.begin(9600);
-  for (int i = 0; i < num_sensores; i++) {
-    pinMode(sensores[i], INPUT);
-  }
-
-  Motor1.Pinout(5, 6); 
-  Motor2.Pinout(9, 10);  
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
-void Gangorra(){
-  if(inc >> necessaria){
-    Motor1.Speed(200)
-    Motor2.Speed(200)
-  } else{
-    Motor1.Speed(200)
-    Motor2.Speed(200)
-  }
-}
-void SeguirLinha(){
-      if (centro && !esquerda && !direita) {
-      Motor1.Forward();
-      Motor2.Forward();
-    } else if (esquerda && !direita) {
-      Motor1.Forward();
-      Motor2.Stop();
-    } else if (!esquerda && direita) {
-      Motor1.Stop();
-      Motor2.Forward();
-    } else {
-      Motor1.Stop();
-      Motor2.Stop();
-    }
-  }
-}
-
-void loop() {a
-  for (int i = 0; i < num_sensores; i++) {
-    read[i] = analogRead(sensores[i]);
-  }
-
-  bool esquerda = read[0] < limiar;
-  bool centro = read[1] < limiar;
-  bool direita = read[2] < limiar;
-
+int medirDistancia() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
+  tempo = pulseIn(echoPin, HIGH);
+  return tempo * 0.034 / 2;
+}
 
-  time = pulseIn(echoPin, HIGH);
-  distance = time * 0.034 / 2;
+void lerSensores(bool &esq, bool &centro, bool &dir) {
+  for (int i = 0; i < num_sensores; i++) {
+    leitura[i] = analogRead(sensores[i]);
+  }
+  esq = leitura[0] < limiar;
+  centro = leitura[1] < limiar;
+  dir = leitura[2] < limiar;
+}
 
-  if (distance < 10) {
-    Motor1.Stop();
+void seguirLinha(bool esq, bool centro, bool dir) {
+  if (centro && !esq && !dir) {
+    Motor1.Forward();
+    Motor2.Forward();
+  } else if (esq && !dir) {
+    Motor1.Forward();
     Motor2.Stop();
-    delay(100);
-    Motor1.Backward();
-    Motor2.Backward();
-    delay(400);
+  } else if (!esq && dir) {
     Motor1.Stop();
-    Motor2.Forward();  // virar
-    delay(500);
-    Motor2.Stop();
+    Motor2.Forward();
   } else {
-    SeguirLinha();
+    Motor1.Stop();
+    Motor2.Stop();
+  }
+}
+
+void desviarObstaculo() {
+  Motor1.Stop();
+  Motor2.Stop();
+  delay(100);
+  Motor1.Backward();
+  Motor2.Backward();
+  delay(400);
+  Motor1.Stop();
+  Motor2.Forward();
+  delay(500);
+  Motor1.Stop();
+  Motor2.Stop();
+}
+
+void setup() {
+  Serial.begin(9600);
+  for (int i = 0; i < num_sensores; i++) {
+    pinMode(sensores[i], INPUT);
+  }
+  Motor1.Pinout(5, 6);
+  Motor2.Pinout(9, 10);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  bool esquerda, centro, direita;
+  lerSensores(esquerda, centro, direita);
+  distancia = medirDistancia();
+
+  if (distancia < 10 && distancia > 0) {
+    desviarObstaculo();
+  } else {
+    seguirLinha(esquerda, centro, direita);
   }
 
-//   Serial.print("E: "); Serial.print(read[0]);
-//   Serial.print(" | C: "); Serial.print(read[1]);
-//   Serial.print(" | D: "); Serial.print(read[2]);
-//   Serial.print(" | Dist: "); Serial.println(distance);
-}// obs: isso e´ pro debug, tirar na hora da apresentaçao
-
-
+  Serial.print("E: "); Serial.print(leitura[0]);
+  Serial.print(" | C: "); Serial.print(leitura[1]);
+  Serial.print(" | D: "); Serial.print(leitura[2]);
+  Serial.print(" | Dist: "); Serial.println(distancia);
+}
