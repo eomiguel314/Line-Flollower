@@ -92,12 +92,12 @@ void loop() {
     Motor2.Forward();
   }
   else if (IR5 < limiar && IR6 > limiar && IR7 > limiar) {
-    // Linha muito à direita — curva forte à direita
+    // Linha muito à direita
     Motor1.Forward();
     Motor2.Backward();
   }
   else {
-    // Perdeu a linha — parar ou fazer busca
+    // Perdeu a linha 
     Motor1.Stop();
     Motor2.Stop();
   }
