@@ -1,119 +1,55 @@
-const int limiar = 500;  
-const int sensores[] = {A0, A1, A2};
-const int num_sensores = 3;
-int leitura[num_sensores];
+#define sIr1 A0
+#define sIr2 A1
+#define sIr3 A2
+#define sIr4 A3
+#define sIr5 A4
+#define sIr6 A5
+#define sIr7 A6
 
-const int trigPin = 7;
-const int echoPin = 8;
-long tempo;
-int distancia;
+int limiar = 30;
 
-class DCMotor {
-  int spd = 255, pin1, pin2;
-
-public:
-  void Pinout(int in1, int in2) {
-    pin1 = in1;
-    pin2 = in2;
-    pinMode(pin1, OUTPUT);
-    pinMode(pin2, OUTPUT);
-  }
-
-  void Speed(int vel) {
-    spd = constrain(vel, 0, 255);
-  }
-
-  void Forward() {
-    analogWrite(pin1, spd);
-    digitalWrite(pin2, LOW);
-  }
-
-  void Backward() {
-    digitalWrite(pin1, LOW);
-    analogWrite(pin2, spd);
-  }
-
-  void Stop() {
-    digitalWrite(pin1, LOW);
-    digitalWrite(pin2, LOW);
-  }
-};
-
-DCMotor Motor1, Motor2;
-
-int medirDistancia() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  tempo = pulseIn(echoPin, HIGH);
-  return tempo * 0.034 / 2;
+void setup(){
+  pinMode(sIr1, INPUT);
+  pinMode(sIr2, INPUT);
+  pinMode(sIr3, INPUT);
+  pinMode(sIr4, INPUT);
+  pinMode(sIr5, INPUT);
+  pinMode(sIr6, INPUT);
+  pinMode(sIr7, INPUT);
+}
+// Branco : 20, Preto : 30
+const read;
+read = analogRead();
+void loop(){
+  if(IR1 == 20 &&  IR2 == 20 && IR3 == limiar && IR4 == limiar && IR5 == limiar && IR6 == 20 && IR7 == 20  ){
+    //Motor Frente
+    // 0 0 1 1 1 0 0 
+  } else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == limiar && IR5 == limiar && IR6 == 20 && IR7 == 20 ){ 
+  // Motor Frente
+  //  0 0 0 1 1 0 0
+}else if(IR1 == 20 &&  IR2 == 20 && IR3 == limiar && IR4 == limiar && IR5 == 20 && IR6 == 20 && IR7 == 20){
+  //Motor Frente 
+  // 0 0 1 1 0 0 0 
 }
 
-void lerSensores(bool &esq, bool &centro, bool &dir) {
-  for (int i = 0; i < num_sensores; i++) {
-    leitura[i] = analogRead(sensores[i]);
-  }
-  esq = leitura[0] < limiar;
-  centro = leitura[1] < limiar;
-  dir = leitura[2] < limiar;
-}
 
-void seguirLinha(bool esq, bool centro, bool dir) {
-  if (centro && !esq && !dir) {
-    Motor1.Forward();
-    Motor2.Forward();
-  } else if (esq && !dir) {
-    Motor1.Forward();
-    Motor2.Stop();
-  } else if (!esq && dir) {
-    Motor1.Stop();
-    Motor2.Forward();
-  } else {
-    Motor1.Stop();
-    Motor2.Stop();
-  }
-}
+else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == limiar && IR5 == limiar && IR6 == limiar && IR7 == 20){
+//0 0 0 1 1 1 0
+}else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == limiar && IR6 == limiar && IR7 == 20){
+ // 0 0 0 0 1 1 0 
+}else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == limiar && IR6 == limiar && IR7 == limiar){}
+ // 0 0 0 0 1 1 1
 
-void desviarObstaculo() {
-  Motor1.Stop();
-  Motor2.Stop();
-  delay(100);
-  Motor1.Backward();
-  Motor2.Backward();
-  delay(400);
-  Motor1.Stop();
-  Motor2.Forward();
-  delay(500);
-  Motor1.Stop();
-  Motor2.Stop();
-}
+else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == limiar){}
+ // 0 0 0 0 0 0 1 girar ate pegar o meio da linha
+// Inverter a logica  
 
-void setup() {
-  Serial.begin(9600);
-  for (int i = 0; i < num_sensores; i++) {
-    pinMode(sensores[i], INPUT);
-  }
-  Motor1.Pinout(5, 6);
-  Motor2.Pinout(9, 10);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
+else if(IR1 == 20 &&  IR2 == limiar && IR3 == limiar && IR4 == limiar && IR5 == 20 && IR6 == 20 && IR7 == 20)
+ // pouco a direita 0 1 1 1 0 0 0 0 ou 
+else if(IR1 == 20 &&  IR2 == limiar && IR3 == limiar && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20){}// 0 1 1  0 0 0 0 pouco a direita 
 
-void loop() {
-  bool esquerda, centro, direita;
-  lerSensores(esquerda, centro, direita);
-  distancia = medirDistancia();
+else if(IR1 == limiar &&  IR2 == limiar && IR3 == 20  && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20){} // 1 1 0 0 0 0 
 
-  if (distancia < 10 && distancia > 0) {
-    desviarObstaculo();
-  } else {
-    seguirLinha(esquerda, centro, direita);
-  }
+else if(IR1 == limiar &&  IR2 == 20 && IR3 == 20  && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20) // 1 0 0 0 0 0 
 
-  Serial.print("E: "); Serial.print(leitura[0]);
-  Serial.print(" | C: "); Serial.print(leitura[1]);
-  Serial.print(" | D: "); Serial.print(leitura[2]);
-  Serial.print(" | Dist: "); Serial.println(distancia);
-}
+
