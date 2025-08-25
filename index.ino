@@ -7,8 +7,41 @@
 #define sIr7 A6
 
 int limiar = 30;
+int branco = 23;
 
-void setup(){
+class DCMotor {
+  int spd = 255, pin1, pin2;
+
+  public:
+    void Pinout(int in1, int in2) {
+      pin1 = in1;
+      pin2 = in2;
+      pinMode(pin1, OUTPUT);
+      pinMode(pin2, OUTPUT);
+    }
+    void Speed(int in1) {
+      spd = in1;
+    }
+    void Forward() {
+      analogWrite(pin1, spd);
+      digitalWrite(pin2, LOW);
+    }
+    void Backward() {
+      digitalWrite(pin1, LOW);
+      analogWrite(pin2, spd);
+    }
+    void Stop() {
+      digitalWrite(pin1, LOW);
+      digitalWrite(pin2, LOW);
+    }
+};
+
+DCMotor Motor1, Motor2;
+
+void setup() {
+  Motor1.Pinout(5, 6);
+  Motor2.Pinout(9, 10);
+
   pinMode(sIr1, INPUT);
   pinMode(sIr2, INPUT);
   pinMode(sIr3, INPUT);
@@ -16,40 +49,58 @@ void setup(){
   pinMode(sIr5, INPUT);
   pinMode(sIr6, INPUT);
   pinMode(sIr7, INPUT);
-}
-// Branco : 20, Preto : 30
-const read;
-read = analogRead();
-void loop(){
-  if(IR1 == 20 &&  IR2 == 20 && IR3 == limiar && IR4 == limiar && IR5 == limiar && IR6 == 20 && IR7 == 20  ){
-    //Motor Frente
-    // 0 0 1 1 1 0 0 
-  } else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == limiar && IR5 == limiar && IR6 == 20 && IR7 == 20 ){ 
-  // Motor Frente
-  //  0 0 0 1 1 0 0
-}else if(IR1 == 20 &&  IR2 == 20 && IR3 == limiar && IR4 == limiar && IR5 == 20 && IR6 == 20 && IR7 == 20){
-  //Motor Frente 
-  // 0 0 1 1 0 0 0 
+
+  Serial.begin(9600);  
 }
 
+void loop() {
+  int IR1 = analogRead(sIr1);
+  int IR2 = analogRead(sIr2);
+  int IR3 = analogRead(sIr3);
+  int IR4 = analogRead(sIr4);
+  int IR5 = analogRead(sIr5);
+  int IR6 = analogRead(sIr6);
+  int IR7 = analogRead(sIr7);
 
-else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == limiar && IR5 == limiar && IR6 == limiar && IR7 == 20){
-//0 0 0 1 1 1 0
-}else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == limiar && IR6 == limiar && IR7 == 20){
- // 0 0 0 0 1 1 0 
-}else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == limiar && IR6 == limiar && IR7 == limiar){}
- // 0 0 0 0 1 1 1
-
-else if(IR1 == 20 &&  IR2 == 20 && IR3 == 20 && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == limiar){}
- // 0 0 0 0 0 0 1 girar ate pegar o meio da linha
-// Inverter a logica  
-
-else if(IR1 == 20 &&  IR2 == limiar && IR3 == limiar && IR4 == limiar && IR5 == 20 && IR6 == 20 && IR7 == 20)
- // pouco a direita 0 1 1 1 0 0 0 0 ou 
-else if(IR1 == 20 &&  IR2 == limiar && IR3 == limiar && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20){}// 0 1 1  0 0 0 0 pouco a direita 
-
-else if(IR1 == limiar &&  IR2 == limiar && IR3 == 20  && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20){} // 1 1 0 0 0 0 
-
-else if(IR1 == limiar &&  IR2 == 20 && IR3 == 20  && IR4 == 20 && IR5 == 20 && IR6 == 20 && IR7 == 20) // 1 0 0 0 0 0 
+  Serial.print(IR1); Serial.print(" ");
+  Serial.print(IR2); Serial.print(" ");
+  Serial.print(IR3); Serial.print(" ");
+  Serial.print(IR4); Serial.print(" ");
+  Serial.print(IR5); Serial.print(" ");
+  Serial.print(IR6); Serial.print(" ");
+  Serial.println(IR7);
 
 
+  if (IR3 > limiar && IR4 > limiar && IR5 > limiar && IR2 < limiar && IR6 < limiar) {
+    // Ir pra frente
+    Motor1.Forward();
+    Motor2.Forward();
+  } 
+  else if (IR2 > limiar && IR3 > limiar && IR4 > limiar && IR5 < limiar) {
+    // Pouco pra esquerda 
+    Motor1.Stop();
+    Motor2.Forward();
+  } 
+  else if (IR4 > limiar && IR5 > limiar && IR6 > limiar && IR3 < limiar) {
+    // Pouco pra direita 
+    Motor1.Forward();
+    Motor2.Stop();
+  }
+  else if (IR1 > limiar && IR2 > limiar && IR3 < limiar) {
+    // Linha muito à esquerda
+    Motor1.Backward();
+    Motor2.Forward();
+  }
+  else if (IR5 < limiar && IR6 > limiar && IR7 > limiar) {
+    // Linha muito à direita — curva forte à direita
+    Motor1.Forward();
+    Motor2.Backward();
+  }
+  else {
+    // Perdeu a linha — parar ou fazer busca
+    Motor1.Stop();
+    Motor2.Stop();
+  }
+
+  delay(100);
+}
