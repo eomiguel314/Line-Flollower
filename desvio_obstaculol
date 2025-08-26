@@ -1,0 +1,23 @@
+#define echo 10
+#define trig 11
+
+
+void setup(){
+  pinMode(echo,INPUT);
+  pinMode(trig,INPUT);
+}
+void loop(){
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  tempo = pulseIn(echoPin, HIGH);
+
+  distancia = tempo * 0.034 / 2;
+
+  if(distancia < 10){
+    //Motor1.Forward();
+    //Motor2.Stop();
+  }else{
+    //SeguirLinha()
+  }
