@@ -6,8 +6,7 @@
 #define sIr6 A5
 #define sIr7 A6
 
-int limiar = 30;
-int branco = 23;
+int limiar = 46; // ------> Ajustar a limiar pra cada pista
 
 class DCMotor {
   int spd = 255, pin1, pin2;
@@ -39,8 +38,8 @@ class DCMotor {
 DCMotor Motor1, Motor2;
 
 void setup() {
-  Motor1.Pinout(5, 6);
-  Motor2.Pinout(9, 10);
+  Motor1.Pinout(2, 3);
+  Motor2.Pinout(4, 5);
 
   pinMode(sIr1, INPUT);
   pinMode(sIr2, INPUT);
@@ -70,37 +69,59 @@ void loop() {
   Serial.print(IR6); Serial.print(" ");
   Serial.println(IR7);
 
-
-  if (IR3 > limiar && IR4 > limiar && IR5 > limiar && IR2 < limiar && IR6 < limiar) {
-    // Ir pra frente
+  if (IR1 < limiar && IR2 < limiar && IR3 > limiar && IR4 > limiar && IR5 > limiar && IR6 < limiar && IR7 < limiar) {
+    // Frente -> 0 0 1 1 1 0 0
     Motor1.Forward();
     Motor2.Forward();
+    Serial.print("Frente");
   } 
-  else if (IR2 > limiar && IR3 > limiar && IR4 > limiar && IR5 < limiar) {
-    // Pouco pra esquerda 
+  else if (IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 > limiar && IR5 > limiar && IR6 < limiar && IR7 < limiar) {
+    // Frente -> 0 0 0 1 1 0 0 
+    Motor1.Forward();
+    Motor2.Forward();
+    Serial.print("Frente");
+  } 
+  else if (IR1 < limiar && IR2 < limiar && IR3 > limiar && IR4 > limiar && IR5 < limiar && IR6 < limiar && IR7 < limiar) {
+    // Frente -> 0 0 1 1 0 0 0
+    Motor1.Forward();
+    Motor2.Forward();
+    Serial.print("Frente");
+  } 
+  else if (IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 > limiar && IR5 > limiar && IR6 > limiar && IR7 < limiar) {
+    // Pouco esquerda -> 0 0 0 1 1 1 0
     Motor1.Stop();
     Motor2.Forward();
   } 
-  else if (IR4 > limiar && IR5 > limiar && IR6 > limiar && IR3 < limiar) {
-    // Pouco pra direita 
-    Motor1.Forward();
-    Motor2.Stop();
-  }
-  else if (IR1 > limiar && IR2 > limiar && IR3 < limiar) {
-    // Linha muito à esquerda
+  else if (IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 < limiar && IR5 > limiar && IR6 > limiar && IR7 < limiar) {
+    // Mais esquerda -> 0 0 0 0 1 1 0 
     Motor1.Backward();
     Motor2.Forward();
   }
-  else if (IR5 < limiar && IR6 > limiar && IR7 > limiar) {
-    // Linha muito à direita
-    Motor1.Forward();
+  else if (IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 < limiar && IR5 > limiar && IR6 > limiar && IR7 > limiar) {
+    // Forte esquerda -> 0 0 0 0 1 1 1 
+    Motor1.Backward();
+    Motor2.Forward();
+  }  
+  else if (IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 < limiar && IR5 < limiar && IR6 < limiar && IR7 > limiar) {
+    // Linha no canto direito -> 0 0 0 0 0 0 1 
+    Motor1.Backward();
+    Motor2.Forward();
+  }
+  else if(IR1 < limiar && IR2 < limiar && IR3 < limiar && IR4 < limiar && IR5 < limiar && IR6 < limiar && IR7 < limiar){
+    // Linha perdida
+    Motor1.Backward();
     Motor2.Backward();
   }
-  else {
-    // Perdeu a linha 
-    Motor1.Stop();
-    Motor2.Stop();
+  else if(IR1 > limiar && IR2 > limiar && IR3 > limiar && IR4 > limiar && IR5 > limiar && IR6 > limiar && IR7 > limiar){
+    // Linha perdida
+    Motor1.Backward();
+    Motor2.Backward();
+  }
+   else {
+  Motor2.Stop();
+  Motor1.Stop();
   }
 
   delay(100);
 }
+ 
